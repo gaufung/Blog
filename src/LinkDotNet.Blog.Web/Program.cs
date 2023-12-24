@@ -45,14 +45,7 @@ public class Program
         builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.UseDummyAuthentication();
-        }
-        else
-        {
-            builder.Services.UseAuthentication();
-        }
+        builder.Services.UseAuthentication();
     }
 
     private static void ConfigureApp(WebApplication app)

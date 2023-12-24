@@ -17,5 +17,5 @@ public sealed class AddTalkEntryModel
     public string Description { get; set; }
 
     [Required]
-    public DateTime PublishedDate { get; set; } = DateTime.Now;
+    public DateTime PublishedDate { get; set; } = DateTime.UtcNow;
 }

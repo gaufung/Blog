@@ -30,3 +30,5 @@ bundle.min.css
 
 # MacOS
 .DS_Store
+
+src/LinkDotNet.Blog.Web/Properties/ServiceDependencies/

@@ -25,7 +25,7 @@ public sealed class BlogPostPublisherTests : SqlDatabaseTestBase<BlogPost>, IDis
     [Fact]
     public async Task ShouldPublishScheduledBlogPosts()
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var bp1 = new BlogPostBuilder().WithScheduledPublishDate(now.AddHours(-3)).IsPublished(false).Build();
         var bp2 = new BlogPostBuilder().WithScheduledPublishDate(now.AddHours(-2)).IsPublished(false).Build();
         var bp3 = new BlogPostBuilder().WithScheduledPublishDate(now.AddHours(2)).IsPublished(false).Build();

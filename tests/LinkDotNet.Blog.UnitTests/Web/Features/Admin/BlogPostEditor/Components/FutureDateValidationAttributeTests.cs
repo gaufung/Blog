@@ -16,7 +16,7 @@ public class FutureDateValidationAttributeTests
             ShortDescription = "Desc",
             Content = "Content",
             IsPublished = false,
-            ScheduledPublishDate = DateTime.Now.AddDays(-1),
+            ScheduledPublishDate = DateTime.UtcNow.AddDays(-1),
             PreviewImageUrl = "https://steven-giesel.com",
         };
         var validationContext = new ValidationContext(model);
