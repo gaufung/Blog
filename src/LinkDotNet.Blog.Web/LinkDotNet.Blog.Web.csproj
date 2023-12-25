@@ -5,6 +5,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <_ContentIncludedByDefault Remove="appsettings.Development.json" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="8.0.0" />
         <PackageReference Include="Blazored.Toast" Version="4.1.0" />
         <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="all" />
