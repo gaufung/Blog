@@ -1,11 +1,14 @@
 using Blazored.Toast;
+
 using HealthChecks.UI.Client;
+
 using LinkDotNet.Blog.Web.Authentication.OpenIdConnect;
-using LinkDotNet.Blog.Web.Authentication.Dummy;
 using LinkDotNet.Blog.Web.Features;
 using LinkDotNet.Blog.Web.RegistrationExtensions;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -31,6 +34,11 @@ public class Program
         builder.Services.AddSignalR(options =>
         {
             options.MaximumReceiveMessageSize = 1024 * 1024;
+        });
+
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.KeyLengthLimit = 1024 * 100;
         });
 
         builder.Services.AddConfiguration();
