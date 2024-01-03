@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -70,7 +70,7 @@ public sealed class CachedRepository<T> : IRepository<T>
         }
     }
 
-    public async ValueTask DeleteBulkAsync(IEnumerable<string> ids) => await repository.DeleteBulkAsync(ids);
+    public ValueTask DeleteBulkAsync(IEnumerable<string> ids) => repository.DeleteBulkAsync(ids);
 
-    public async ValueTask StoreBulkAsync(IEnumerable<T> records) => await repository.StoreBulkAsync(records);
+    public ValueTask StoreBulkAsync(IEnumerable<T> records) => repository.StoreBulkAsync(records);
 }

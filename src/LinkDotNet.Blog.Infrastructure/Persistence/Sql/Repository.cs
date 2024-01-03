@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -166,10 +166,13 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         }
     }
 
+    public ValueTask UpdateAsync(string id, TEntity entity) => throw new NotImplementedException();
+
     [LoggerMessage(LogLevel.Debug, "Saving Batch. In total {Count} elements saved")]
     private partial void LogBatch(int count);
 
 
     [LoggerMessage(LogLevel.Debug, "Deleted Batch {BatchNumber}. In total {TotalDeleted} elements deleted")]
     private partial void LogDeleteBatch(int batchNumber, int totalDeleted);
+    
 }

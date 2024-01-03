@@ -94,7 +94,7 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         if (httpResponseMessage.IsSuccessStatusCode)
         {
             using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(token);
-            var files = await JsonSerializer.DeserializeAsync<GithubFile[]>(contentStream, GitHubContentJsonSerializerOptions, cancellationToken: token);
+            var files = await JsonSerializer.DeserializeAsync<GitHubFile[]>(contentStream, GitHubContentJsonSerializerOptions, cancellationToken: token);
             if (files == null || files.Length == 0)
             {
                 logger.FindEmptyEpisodeDocument(episodeSyncOption.ContentAPI);
@@ -110,7 +110,7 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         }
     }
 
-    private async Task UpdateEpisodes(GithubFile[] files, IReadOnlyList<BlogPost> blogPosts, CancellationToken token)
+    private async Task UpdateEpisodes(GitHubFile[] files, IReadOnlyList<BlogPost> blogPosts, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(files);
         ArgumentNullException.ThrowIfNull(blogPosts);
@@ -157,7 +157,7 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
 
     public Task StopAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
 
-    class GithubFile
+    class GitHubFile
     {
         private static readonly Regex Regex = new(@"episode-(?<index>\d+)\.md");
 
@@ -178,10 +178,6 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
 
 #pragma warning disable S1144 // Unused private types or members should be removed
         public string Url { get; set; }
-#pragma warning restore S1144 // Unused private types or members should be removed
-
-#pragma warning disable S1144 // Unused private types or members should be removed
-        public string Type { get; set; }
 #pragma warning restore S1144 // Unused private types or members should be removed
 
         public string Id { get; private set; }
