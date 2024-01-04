@@ -1,14 +1,15 @@
-using Amazon.Runtime.Internal.Util;
-
 using LinkDotNet.Blog.Domain;
 using LinkDotNet.Blog.Infrastructure.Persistence;
 using LinkDotNet.Blog.Web.Options;
 
+using Markdig;
+using Markdig.Syntax;
+using Markdig.Syntax.Inlines;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
-using SharpCompress.Common;
 
 using System;
 using System.Collections.Generic;
@@ -22,15 +23,11 @@ using System.Threading.Tasks;
 
 namespace LinkDotNet.Blog.Web.Services;
 
-public class UpdateEpisodeHostedService : IHostedService, IDisposable
+public sealed class UpdateEpisodeHostedService : BackgroundService
 {
     private readonly ILogger<UpdateEpisodeHostedService> logger;
     private readonly IHttpClientFactory httpClientFactory;
-    private readonly IRepository<BlogPost> repository;
-
-    private PeriodicTimer timer;
-
-    private Task timerTask;
+    private readonly IServiceProvider serviceProvider;
 
     private readonly EpisodeSyncOption episodeSyncOption;
 
@@ -39,11 +36,11 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         PropertyNameCaseInsensitive = true, 
     };
 
-    private static readonly string[] Tags = new string[] { ".NET Weekly" };
+    private static readonly string[] Tags = [".NET Weekly"];
 
     public UpdateEpisodeHostedService(
         IHttpClientFactory httpClientFactory,
-        IRepository<BlogPost> repository,
+        IServiceProvider serviceProvider,
         IOptions<EpisodeSyncOption> episodeSyncOptionAccessor,
         ILogger<UpdateEpisodeHostedService> logger)
     {
@@ -51,43 +48,29 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         this.httpClientFactory = httpClientFactory;
         episodeSyncOption = episodeSyncOptionAccessor.Value;
         this.logger = logger;
-        this.repository = repository;
+        this.serviceProvider = serviceProvider;
     }
 
-    public void Dispose() => timer?.Dispose();
-    public Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        if (episodeSyncOption.Enabled && !string.IsNullOrWhiteSpace(episodeSyncOption.ContentAPI))
-        {
-            logger.StartUpdatingEpisode();
-            timer = new PeriodicTimer(TimeSpan.FromHours(1));
-            timerTask = Start(cancellationToken);
-        }
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
 
-        return Task.CompletedTask;
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await Start(stoppingToken);
+
+            await timer.WaitForNextTickAsync(stoppingToken);
+        }
     }
 
     private async Task Start(CancellationToken token)
     {
-        if (timer is null)
-        {
-            return;
-        }
-        try
-        {
-            while (await timer.WaitForNextTickAsync(token) &&
-                !token.IsCancellationRequested)
-            {
-                await Update(token);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            logger.UpdateEpisodeCanceled();
-        }
+        using var scope = serviceProvider.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepository<BlogPost>>();
+        await Update(repository, token);
     }
 
-    private async Task Update(CancellationToken token)
+    private async Task Update(IRepository<BlogPost> repository, CancellationToken token)
     {
         var httpClient = httpClientFactory.CreateClient("GitHub");
         var httpResponseMessage = await httpClient.GetAsync(new Uri(episodeSyncOption.ContentAPI), token);
@@ -100,9 +83,9 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
                 logger.FindEmptyEpisodeDocument(episodeSyncOption.ContentAPI);
                 return;
             }
-            files = files.Where(p => p.Name.StartsWith("episode", StringComparison.OrdinalIgnoreCase)).ToArray();
+            files = files.Where(p => p.Name.StartsWith("episode", StringComparison.OrdinalIgnoreCase)).OrderBy(p => p.Id).ToArray();
             var blogPosts = await repository.GetAllAsync(blogPost => blogPost.Title.StartsWith(".NET 周刊第"));
-            await UpdateEpisodes(files, blogPosts, token);
+            await UpdateEpisodes(repository, files, blogPosts, token);
         }
         else
         {
@@ -110,7 +93,7 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         }
     }
 
-    private async Task UpdateEpisodes(GitHubFile[] files, IReadOnlyList<BlogPost> blogPosts, CancellationToken token)
+    private async Task UpdateEpisodes(IRepository<BlogPost> repository, GitHubFile[] files, IReadOnlyList<BlogPost> blogPosts, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(files);
         ArgumentNullException.ThrowIfNull(blogPosts);
@@ -140,12 +123,14 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
                         continue;
                     }
 
-                    // TODO Upgrade the BlogPost
+                    await repository.DeleteAsync(blogPost.Id);
+                    var previewImageUrl = ExtractFirstImageLinkFromMarkdown(fileContent.Content);
+                    await repository.StoreAsync(BlogPost.Create($".NET 周刊第 {file.Id} 期", $".NET 周刊第 {file.Id} 期", fileContent.Content, previewImageUrl, true, blogPost.UpdatedDate, null, Tags));
                 }
                 else
                 {
-                    // TODO Extract the preview url
-                    await repository.StoreAsync(BlogPost.Create($".NET 周刊第 {file.Id} 期", $".NET 周刊第 {file.Id} 期", fileContent.Content, "", true, null, null, Tags));
+                    var previewImageUrl = ExtractFirstImageLinkFromMarkdown(fileContent.Content);
+                    await repository.StoreAsync(BlogPost.Create($".NET 周刊第 {file.Id} 期", $".NET 周刊第 {file.Id} 期", fileContent.Content, previewImageUrl, true, null, null, Tags));
                 }
             }
             else
@@ -155,9 +140,15 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         }
     }
 
-    public Task StopAsync(CancellationToken cancellationToken) => throw new NotImplementedException();
+    private static string ExtractFirstImageLinkFromMarkdown(string markdownContent)
+    {
+        var doc = Markdown.Parse(markdownContent);
+        // Select paragraph blocks and then all LinkInline and take the first one
+        var link = doc.Descendants<ParagraphBlock>().SelectMany(x => x.Inline.Descendants<LinkInline>()).FirstOrDefault(l => l.IsImage);
+        return link?.Url ?? string.Empty;
+    }
 
-    class GitHubFile
+    sealed class GitHubFile
     {
         private static readonly Regex Regex = new(@"episode-(?<index>\d+)\.md");
 
@@ -177,7 +168,9 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
         }
 
 #pragma warning disable S1144 // Unused private types or members should be removed
+#pragma warning disable S3459 // Unassigned members should be removed
         public string Url { get; set; }
+#pragma warning restore S3459 // Unassigned members should be removed
 #pragma warning restore S1144 // Unused private types or members should be removed
 
         public string Id { get; private set; }
@@ -199,7 +192,7 @@ public class UpdateEpisodeHostedService : IHostedService, IDisposable
 
     }
 
-    class GitHubFileContent
+    sealed class GitHubFileContent
     {
         public string Content { get; set; }
     }

@@ -4,13 +4,17 @@ using HealthChecks.UI.Client;
 
 using LinkDotNet.Blog.Web.Authentication.OpenIdConnect;
 using LinkDotNet.Blog.Web.Features;
+using LinkDotNet.Blog.Web.Options;
 using LinkDotNet.Blog.Web.RegistrationExtensions;
+using LinkDotNet.Blog.Web.Services;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using static Raven.Client.Constants;
 
 namespace LinkDotNet.Blog.Web;
 
@@ -42,13 +46,20 @@ public class Program
         });
 
         builder.Services.AddConfiguration();
+        builder.Services.AddHttpClient("GitHub", client =>
+        {
+            client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("dotnetweekly");
+        });
 
         builder.Services.AddBlazoredToast();
         builder.Services.RegisterServices();
         builder.Services.AddStorageProvider(builder.Configuration);
+        builder.Services.Configure<EpisodeSyncOption>(builder.Configuration.GetSection("EpisodeSync"));
         builder.Services.AddResponseCompression();
         builder.Services.AddHostedService<BlogPostPublisher>();
         builder.Services.AddHostedService<TransformBlogPostRecordsService>();
+        builder.Services.AddHostedService<UpdateEpisodeHostedService>();
 
         builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");
