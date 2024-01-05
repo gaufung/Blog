@@ -53,7 +53,7 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
+        using var timer = new PeriodicTimer(TimeSpan.FromHours(6));
 
         while (!stoppingToken.IsCancellationRequested)
         {
