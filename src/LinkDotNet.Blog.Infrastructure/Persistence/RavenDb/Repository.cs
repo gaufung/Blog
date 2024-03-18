@@ -9,22 +9,17 @@ using Raven.Client.Documents.Linq;
 
 namespace LinkDotNet.Blog.Infrastructure.Persistence.RavenDb;
 
-public sealed class Repository<TEntity> : IRepository<TEntity>
+public sealed class Repository<TEntity>(IDocumentStore documentStore) : IRepository<TEntity>
     where TEntity : Entity
 {
-    private readonly IDocumentStore documentStore;
-
-    public Repository(IDocumentStore documentStore)
-    {
-        this.documentStore = documentStore;
-    }
+    private readonly IDocumentStore documentStore = documentStore;
 
     public async ValueTask<HealthCheckResult> PerformHealthCheckAsync()
     {
         try
         {
             using var session = documentStore.OpenAsyncSession();
-            await session.Query<TEntity>().FirstOrDefaultAsync();
+            _ = await session.Query<TEntity>().FirstOrDefaultAsync();
             return HealthCheckResult.Healthy();
         }
         catch (Exception e)
@@ -44,10 +39,7 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
         Expression<Func<TEntity, object>> orderBy = null,
         bool descending = true,
         int page = 1,
-        int pageSize = int.MaxValue)
-    {
-        return await GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
-    }
+        int pageSize = int.MaxValue) => await GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
 
     public async ValueTask<IPagedList<TProjection>> GetAllByProjectionAsync<TProjection>(
         Expression<Func<TEntity, TProjection>> selector,

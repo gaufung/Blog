@@ -7,10 +7,7 @@ namespace LinkDotNet.Blog.Infrastructure.Persistence.Sql;
 public sealed class BlogDbContext : DbContext
 {
     public BlogDbContext(DbContextOptions options)
-        : base(options)
-    {
-        Database.EnsureCreated();
-    }
+        : base(options) => Database.EnsureCreated();
 
     public DbSet<BlogPost> BlogPosts { get; set; }
 
@@ -28,6 +25,6 @@ public sealed class BlogDbContext : DbContext
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogDbContext).Assembly);
+        _ = modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogDbContext).Assembly);
     }
 }

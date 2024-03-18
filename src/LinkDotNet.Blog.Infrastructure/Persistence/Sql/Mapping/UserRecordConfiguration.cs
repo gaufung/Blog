@@ -8,10 +8,10 @@ internal sealed class UserRecordConfiguration : IEntityTypeConfiguration<UserRec
 {
     public void Configure(EntityTypeBuilder<UserRecord> builder)
     {
-        builder.HasKey(s => s.Id);
-        builder.Property(s => s.Id)
+        _ = builder.HasKey(s => s.Id);
+        _ = builder.Property(s => s.Id)
             .IsUnicode(false)
             .ValueGeneratedOnAdd();
-        builder.Property(s => s.UrlClicked).HasMaxLength(256).IsRequired();
+        _ = builder.Property(s => s.UrlClicked).HasMaxLength(256).IsRequired();
     }
 }

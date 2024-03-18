@@ -5,5 +5,7 @@
         <Nullable>disable</Nullable>
         <AssemblyName>LinkDotNet.Blog.Domain</AssemblyName>
         <RootNamespace>LinkDotNet.Blog.Domain</RootNamespace>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
     </PropertyGroup>
 </Project>

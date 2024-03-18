@@ -8,11 +8,11 @@ internal sealed class ProfileInformationEntryConfiguration : IEntityTypeConfigur
 {
     public void Configure(EntityTypeBuilder<ProfileInformationEntry> builder)
     {
-        builder.HasKey(c => c.Id);
-        builder.Property(c => c.Id)
+        _ = builder.HasKey(c => c.Id);
+        _ = builder.Property(c => c.Id)
             .IsUnicode(false)
             .ValueGeneratedOnAdd();
-        builder.Property(c => c.Content).HasMaxLength(512).IsRequired();
-        builder.Property(c => c.SortOrder).IsRequired();
+        _ = builder.Property(c => c.Content).HasMaxLength(512).IsRequired();
+        _ = builder.Property(c => c.SortOrder).IsRequired();
     }
 }

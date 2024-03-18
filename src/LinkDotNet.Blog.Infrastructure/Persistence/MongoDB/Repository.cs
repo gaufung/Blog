@@ -11,23 +11,18 @@ using MongoDB.Driver.Linq;
 
 namespace LinkDotNet.Blog.Infrastructure.Persistence.MongoDB;
 
-public sealed class Repository<TEntity> : IRepository<TEntity>
+public sealed class Repository<TEntity>(IMongoDatabase database) : IRepository<TEntity>
     where TEntity : Entity
 {
-    private readonly IMongoDatabase database;
+    private readonly IMongoDatabase database = database;
     private IMongoCollection<TEntity> Collection => database.GetCollection<TEntity>(typeof(TEntity).Name);
-
-    public Repository(IMongoDatabase database)
-    {
-        this.database = database;
-    }
 
     public async ValueTask<HealthCheckResult> PerformHealthCheckAsync()
     {
         try
         {
             var command = new BsonDocument("ping", 1);
-            await database.RunCommandAsync<BsonDocument>(command);
+            _ = await database.RunCommandAsync<BsonDocument>(command);
 
             return HealthCheckResult.Healthy("A healthy result.");
         }
@@ -87,19 +82,19 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
 
         var filter = Builders<TEntity>.Filter.Eq(doc => doc.Id, entity.Id);
         var options = new ReplaceOptions { IsUpsert = true };
-        await Collection.ReplaceOneAsync(filter, entity, options);
+        _ = await Collection.ReplaceOneAsync(filter, entity, options);
     }
 
     public async ValueTask DeleteAsync(string id)
     {
         var filter = Builders<TEntity>.Filter.Eq(doc => doc.Id, id);
-        await Collection.DeleteOneAsync(filter);
+        _ = await Collection.DeleteOneAsync(filter);
     }
 
     public async ValueTask DeleteBulkAsync(IEnumerable<string> ids)
     {
         var filter = Builders<TEntity>.Filter.In(doc => doc.Id, ids);
-        await Collection.DeleteManyAsync(filter);
+        _ = await Collection.DeleteManyAsync(filter);
     }
 
     public async ValueTask StoreBulkAsync(IEnumerable<TEntity> records)

@@ -8,28 +8,19 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace LinkDotNet.Blog.Infrastructure.Persistence;
 
-public sealed class CachedRepository<T> : IRepository<T>
+public sealed class CachedRepository<T>(IRepository<T> repository, IMemoryCache memoryCache) : IRepository<T>
     where T : Entity
 {
-    private readonly IRepository<T> repository;
-    private readonly IMemoryCache memoryCache;
-
-    public CachedRepository(IRepository<T> repository, IMemoryCache memoryCache)
-    {
-        this.repository = repository;
-        this.memoryCache = memoryCache;
-    }
+    private readonly IRepository<T> repository = repository;
+    private readonly IMemoryCache memoryCache = memoryCache;
 
     public ValueTask<HealthCheckResult> PerformHealthCheckAsync() => repository.PerformHealthCheckAsync();
 
-    public async ValueTask<T> GetByIdAsync(string id)
-    {
-        return await memoryCache.GetOrCreateAsync(id, async entry =>
-        {
-            entry.SlidingExpiration = TimeSpan.FromDays(7);
-            return await repository.GetByIdAsync(id);
-        });
-    }
+    public async ValueTask<T> GetByIdAsync(string id) => await memoryCache.GetOrCreateAsync(id, async entry =>
+                                                              {
+                                                                  entry.SlidingExpiration = TimeSpan.FromDays(7);
+                                                                  return await repository.GetByIdAsync(id);
+                                                              });
 
     public async ValueTask<IPagedList<T>> GetAllAsync(
         Expression<Func<T, bool>> filter = null,

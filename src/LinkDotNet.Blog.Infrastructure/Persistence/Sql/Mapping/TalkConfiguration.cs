@@ -8,12 +8,12 @@ internal sealed class TalkConfiguration : IEntityTypeConfiguration<Talk>
 {
     public void Configure(EntityTypeBuilder<Talk> builder)
     {
-        builder.HasKey(t => t.Id);
-        builder.Property(t => t.Id)
+        _ = builder.HasKey(t => t.Id);
+        _ = builder.Property(t => t.Id)
             .IsUnicode(false)
             .ValueGeneratedOnAdd();
-        builder.Property(t => t.PresentationTitle).HasMaxLength(256).IsRequired();
-        builder.Property(t => t.Place).HasMaxLength(256).IsRequired();
-        builder.Property(t => t.PublishedDate).IsRequired();
+        _ = builder.Property(t => t.PresentationTitle).HasMaxLength(256).IsRequired();
+        _ = builder.Property(t => t.Place).HasMaxLength(256).IsRequired();
+        _ = builder.Property(t => t.PublishedDate).IsRequired();
     }
 }

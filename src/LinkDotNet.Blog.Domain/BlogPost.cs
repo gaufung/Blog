@@ -54,7 +54,7 @@ public sealed partial class BlogPost : Entity
 
         foreach (var c in normalizedTitle.Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark))
         {
-            stringBuilder.Append(c);
+            _ = stringBuilder.Append(c);
         }
 
         var cleanTitle = stringBuilder
@@ -115,7 +115,7 @@ public sealed partial class BlogPost : Entity
             PreviewImageUrl = previewImageUrl,
             PreviewImageUrlFallback = previewImageUrlFallback,
             IsPublished = isPublished,
-            Tags = tags?.Select(t => t.Trim()).ToImmutableArray() ?? ImmutableArray<string>.Empty,
+            Tags = tags?.Select(t => t.Trim()).ToImmutableArray() ?? [],
             ReadingTimeInMinutes = ReadingTimeCalculator.CalculateReadingTime(content),
         };
 

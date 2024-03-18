@@ -10,24 +10,21 @@ using Microsoft.Extensions.Logging;
 
 namespace LinkDotNet.Blog.Infrastructure.Persistence.Sql;
 
-public sealed partial class Repository<TEntity> : IRepository<TEntity>
+public sealed partial class Repository<TEntity>(IDbContextFactory<BlogDbContext> dbContextFactory, ILogger<Repository<TEntity>> logger) : IRepository<TEntity>
     where TEntity : Entity
 {
-    private readonly IDbContextFactory<BlogDbContext> dbContextFactory;
-    private readonly ILogger<Repository<TEntity>> logger;
+    private readonly IDbContextFactory<BlogDbContext> dbContextFactory = dbContextFactory;
 
-    public Repository(IDbContextFactory<BlogDbContext> dbContextFactory, ILogger<Repository<TEntity>> logger)
-    {
-        this.dbContextFactory = dbContextFactory;
-        this.logger = logger;
-    }
+#pragma warning disable CA1823 // Avoid unused private fields
+    private readonly ILogger<Repository<TEntity>> logger = logger;
+#pragma warning restore CA1823 // Avoid unused private fields
 
     public async ValueTask<HealthCheckResult> PerformHealthCheckAsync()
     {
         try
         {
             var db = await dbContextFactory.CreateDbContextAsync();
-            await db.Database.ExecuteSqlRawAsync("SELECT 1");
+            _ = await db.Database.ExecuteSqlRawAsync("SELECT 1");
             return HealthCheckResult.Healthy();
         }
         catch (Exception exc)
@@ -47,10 +44,7 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         Expression<Func<TEntity, object>> orderBy = null,
         bool descending = true,
         int page = 1,
-        int pageSize = int.MaxValue)
-    {
-        return await GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
-    }
+        int pageSize = int.MaxValue) => await GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
 
     public async ValueTask<IPagedList<TProjection>> GetAllByProjectionAsync<TProjection>(
         Expression<Func<TEntity, TProjection>> selector,
@@ -86,14 +80,14 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         var blogDbContext = await dbContextFactory.CreateDbContextAsync();
         if (string.IsNullOrEmpty(entity.Id))
         {
-            await blogDbContext.Set<TEntity>().AddAsync(entity);
+            _ = await blogDbContext.Set<TEntity>().AddAsync(entity);
         }
         else
         {
             blogDbContext.Entry(entity).State = EntityState.Modified;
         }
 
-        await blogDbContext.SaveChangesAsync();
+        _ = await blogDbContext.SaveChangesAsync();
     }
 
     public async ValueTask DeleteAsync(string id)
@@ -102,8 +96,8 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         if (entityToDelete != null)
         {
             var blogDbContext = await dbContextFactory.CreateDbContextAsync();
-            blogDbContext.Remove(entityToDelete);
-            await blogDbContext.SaveChangesAsync();
+            _ = blogDbContext.Remove(entityToDelete);
+            _ = await blogDbContext.SaveChangesAsync();
         }
     }
 
@@ -112,7 +106,7 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         var blogDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = blogDbContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async () => await DeleteBulkAsyncInBatchesAsync());
+        await strategy.ExecuteAsync(DeleteBulkAsyncInBatchesAsync);
 
         async Task DeleteBulkAsyncInBatchesAsync()
         {
@@ -126,7 +120,7 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
             {
                 var currentBatchIds = idList.Skip(batch * batchSize).Take(batchSize).ToList();
 
-                await blogDbContext.Set<TEntity>()
+                _ = await blogDbContext.Set<TEntity>()
                     .Where(s => currentBatchIds.Contains(s.Id))
                     .ExecuteDeleteAsync();
 
@@ -144,7 +138,7 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
         var blogDbContext = await dbContextFactory.CreateDbContextAsync();
         var strategy = blogDbContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async () => await StoreBulkAsyncInBatchesAsync());
+        await strategy.ExecuteAsync(StoreBulkAsyncInBatchesAsync);
 
         async Task StoreBulkAsyncInBatchesAsync()
         {
@@ -153,15 +147,15 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
             var count = 0;
             foreach (var record in records)
             {
-                await blogDbContext.Set<TEntity>().AddAsync(record);
+                _ = await blogDbContext.Set<TEntity>().AddAsync(record);
                 if (++count % 1000 == 0)
                 {
                     LogBatch(count);
-                    await blogDbContext.SaveChangesAsync();
+                    _ = await blogDbContext.SaveChangesAsync();
                 }
             }
 
-            await blogDbContext.SaveChangesAsync();
+            _ = await blogDbContext.SaveChangesAsync();
             await trx.CommitAsync();
         }
     }
@@ -174,5 +168,4 @@ public sealed partial class Repository<TEntity> : IRepository<TEntity>
 
     [LoggerMessage(LogLevel.Debug, "Deleted Batch {BatchNumber}. In total {TotalDeleted} elements deleted")]
     private partial void LogDeleteBatch(int batchNumber, int totalDeleted);
-    
 }

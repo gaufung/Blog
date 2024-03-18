@@ -11,7 +11,7 @@ namespace LinkDotNet.Blog.Infrastructure.Persistence.InMemory;
 public sealed class Repository<TEntity> : IRepository<TEntity>
     where TEntity : Entity
 {
-    private readonly List<TEntity> entities = new();
+    private readonly List<TEntity> entities = [];
 
     public ValueTask<HealthCheckResult> PerformHealthCheckAsync() => ValueTask.FromResult(HealthCheckResult.Healthy());
 
@@ -26,10 +26,7 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
         Expression<Func<TEntity, object>> orderBy = null,
         bool descending = true,
         int page = 1,
-        int pageSize = int.MaxValue)
-    {
-        return GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
-    }
+        int pageSize = int.MaxValue) => GetAllByProjectionAsync(s => s, filter, orderBy, descending, page, pageSize);
 
     public ValueTask<IPagedList<TProjection>> GetAllByProjectionAsync<TProjection>(
         Expression<Func<TEntity, TProjection>> selector,
@@ -68,7 +65,7 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
         var entry = entities.SingleOrDefault(b => b.Id == entity.Id);
         if (entry != null)
         {
-            entities.Remove(entry);
+            _ = entities.Remove(entry);
         }
 
         entities.Add(entity);
@@ -80,7 +77,7 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
         var blogPostToDelete = entities.SingleOrDefault(b => b.Id == id);
         if (blogPostToDelete != null)
         {
-            entities.Remove(blogPostToDelete);
+            _ = entities.Remove(blogPostToDelete);
         }
 
         return ValueTask.CompletedTask;
@@ -93,7 +90,7 @@ public sealed class Repository<TEntity> : IRepository<TEntity>
         foreach (var id in ids)
         {
             var entity = entities.First(e => e.Id == id);
-            entities.Remove(entity);
+            _ = entities.Remove(entity);
         }
 
         return ValueTask.CompletedTask;
