@@ -12,7 +12,7 @@ public sealed class BlogPostModel
 
     public string PreviewImageUrl { get; set; }
 
-    public string PreviewImageUrlFallback { get;  set; }
+    public string PreviewImageUrlFallback { get; set; }
 
     public IReadOnlyList<string> Tags { get; set; }
 }

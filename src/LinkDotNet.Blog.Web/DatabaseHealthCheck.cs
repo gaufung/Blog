@@ -6,17 +6,12 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace LinkDotNet.Blog.Web;
 
-public class DatabaseHealthCheck : IHealthCheck
+public class DatabaseHealthCheck(IRepository<BlogPost> repository) : IHealthCheck
 {
-    private readonly IRepository<BlogPost> repository;
-
-    public DatabaseHealthCheck(IRepository<BlogPost> repository)
-    {
-        this.repository = repository;
-    }
+    private readonly IRepository<BlogPost> repository = repository;
 
     public Task<HealthCheckResult> CheckHealthAsync(
         HealthCheckContext context,
-        CancellationToken cancellationToken =  default) =>
+        CancellationToken cancellationToken = default) =>
         repository.PerformHealthCheckAsync().AsTask();
 }

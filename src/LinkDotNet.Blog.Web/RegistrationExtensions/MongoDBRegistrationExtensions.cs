@@ -11,13 +11,13 @@ public static class MongoDBRegistrationExtensions
     {
         services.AssertNotAlreadyRegistered(typeof(IRepository<>));
 
-        services.AddSingleton(ctx =>
+        _ = services.AddSingleton(ctx =>
         {
             var configuration = ctx.GetRequiredService<IOptions<ApplicationConfiguration>>();
             var connectionString = configuration.Value.ConnectionString;
             var databaseName = configuration.Value.DatabaseName;
             return MongoDBConnectionProvider.Create(connectionString, databaseName);
         });
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        _ = services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     }
 }

@@ -4,17 +4,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace LinkDotNet.Blog.Web.Pages;
 
-public sealed partial class LogoutModel : PageModel
+public sealed partial class LogoutModel(ILoginManager loginManager) : PageModel
 {
-    private readonly ILoginManager loginManager;
+    private readonly ILoginManager loginManager = loginManager;
 
-    public LogoutModel(ILoginManager loginManager)
-    {
-        this.loginManager = loginManager;
-    }
-
-    public async Task OnGet(string redirectUri)
-    {
-        await loginManager.SignOutAsync(redirectUri);
-    }
+    public async Task OnGet(string redirectUri) => await loginManager.SignOutAsync(redirectUri);
 }

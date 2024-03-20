@@ -10,16 +10,10 @@ using Microsoft.Extensions.Logging;
 
 namespace LinkDotNet.Blog.Web.Features;
 
-public sealed partial class BlogPostPublisher : BackgroundService
+public sealed partial class BlogPostPublisher(IServiceProvider serviceProvider, ILogger<BlogPostPublisher> logger) : BackgroundService
 {
-    private readonly IServiceProvider serviceProvider;
-    private readonly ILogger<BlogPostPublisher> logger;
-
-    public BlogPostPublisher(IServiceProvider serviceProvider, ILogger<BlogPostPublisher> logger)
-    {
-        this.serviceProvider = serviceProvider;
-        this.logger = logger;
-    }
+    private readonly IServiceProvider serviceProvider = serviceProvider;
+    private readonly ILogger<BlogPostPublisher> logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -31,7 +25,7 @@ public sealed partial class BlogPostPublisher : BackgroundService
         {
             await PublishScheduledBlogPostsAsync();
 
-            await timer.WaitForNextTickAsync(stoppingToken);
+            _ = await timer.WaitForNextTickAsync(stoppingToken);
         }
 
         LogPublishStopping();

@@ -10,21 +10,14 @@ using Microsoft.AspNetCore.Components;
 
 namespace LinkDotNet.Blog.Web.Features.Admin.Sitemap.Services;
 
-public sealed class SitemapService : ISitemapService
+public sealed class SitemapService(
+    IRepository<BlogPost> repository,
+    NavigationManager navigationManager,
+    IXmlFileWriter xmlFileWriter) : ISitemapService
 {
-    private readonly IRepository<BlogPost> repository;
-    private readonly NavigationManager navigationManager;
-    private readonly IXmlFileWriter xmlFileWriter;
-
-    public SitemapService(
-        IRepository<BlogPost> repository,
-        NavigationManager navigationManager,
-        IXmlFileWriter xmlFileWriter)
-    {
-        this.repository = repository;
-        this.navigationManager = navigationManager;
-        this.xmlFileWriter = xmlFileWriter;
-    }
+    private readonly IRepository<BlogPost> repository = repository;
+    private readonly NavigationManager navigationManager = navigationManager;
+    private readonly IXmlFileWriter xmlFileWriter = xmlFileWriter;
 
     public async Task<SitemapUrlSet> CreateSitemapAsync()
     {
@@ -40,28 +33,19 @@ public sealed class SitemapService : ISitemapService
         return urlSet;
     }
 
-    public async Task SaveSitemapToFileAsync(SitemapUrlSet sitemap)
-    {
-        await xmlFileWriter.WriteObjectToXmlFileAsync(sitemap, "wwwroot/sitemap.xml");
-    }
+    public async Task SaveSitemapToFileAsync(SitemapUrlSet sitemap) => await xmlFileWriter.WriteObjectToXmlFileAsync(sitemap, "wwwroot/sitemap.xml");
 
-    private IEnumerable<SitemapUrl> CreateUrlsForBlogPosts(IEnumerable<BlogPost> blogPosts)
+    private IEnumerable<SitemapUrl> CreateUrlsForBlogPosts(IEnumerable<BlogPost> blogPosts) => blogPosts.Select(b => new SitemapUrl
     {
-        return blogPosts.Select(b => new SitemapUrl
-        {
-            Location = $"{navigationManager.BaseUri}blogPost/{b.Id}",
-            LastModified = b.UpdatedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
-        }).ToImmutableArray();
-    }
+        Location = $"{navigationManager.BaseUri}blogPost/{b.Id}",
+        LastModified = b.UpdatedDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+    }).ToImmutableArray();
 
-    private IEnumerable<SitemapUrl> CreateUrlsForTags(IEnumerable<BlogPost> blogPosts)
-    {
-        return blogPosts
+    private IEnumerable<SitemapUrl> CreateUrlsForTags(IEnumerable<BlogPost> blogPosts) => blogPosts
             .SelectMany(b => b.Tags)
             .Distinct()
             .Select(t => new SitemapUrl
             {
                 Location = $"{navigationManager.BaseUri}searchByTag/{Uri.EscapeDataString(t)}",
             });
-    }
 }

@@ -13,7 +13,7 @@ public static class StorageProviderExtensions
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
-        services.AddMemoryCache();
+        _ = services.AddMemoryCache();
 
         var persistenceProvider = PersistenceProvider.Create(configuration["PersistenceProvider"]);
 
@@ -52,8 +52,8 @@ public static class StorageProviderExtensions
     private static void RegisterCachedRepository<TRepo>(this IServiceCollection services)
         where TRepo : class, IRepository<BlogPost>
     {
-        services.AddScoped<TRepo>();
-        services.AddScoped<IRepository<BlogPost>>(provider => new CachedRepository<BlogPost>(
+        _ = services.AddScoped<TRepo>();
+        _ = services.AddScoped<IRepository<BlogPost>>(provider => new CachedRepository<BlogPost>(
                 provider.GetRequiredService<TRepo>(),
                 provider.GetRequiredService<IMemoryCache>()));
     }

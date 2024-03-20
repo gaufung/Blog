@@ -34,7 +34,7 @@ public sealed class BlogPostController : ControllerBase
 
     [HttpPost]
     [Route("")]
-    public async Task<IActionResult> CreateBlogPost([FromBody]BlogPostModel model)
+    public async Task<IActionResult> CreateBlogPost([FromBody] BlogPostModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
         var blogPost = BlogPost.Create(model.Title, model.ShortDescription, model.Content, model.PreviewImageUrl, true, null, null, model.Tags);

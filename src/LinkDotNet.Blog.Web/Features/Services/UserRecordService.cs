@@ -8,24 +8,16 @@ using Microsoft.Extensions.Logging;
 
 namespace LinkDotNet.Blog.Web.Features.Services;
 
-public sealed partial class UserRecordService : IUserRecordService
+public sealed partial class UserRecordService(
+    IRepository<UserRecord> userRecordRepository,
+    NavigationManager navigationManager,
+    AuthenticationStateProvider authenticationStateProvider,
+    ILogger<UserRecordService> logger) : IUserRecordService
 {
-    private readonly IRepository<UserRecord> userRecordRepository;
-    private readonly NavigationManager navigationManager;
-    private readonly AuthenticationStateProvider authenticationStateProvider;
-    private readonly ILogger<UserRecordService> logger;
-
-    public UserRecordService(
-        IRepository<UserRecord> userRecordRepository,
-        NavigationManager navigationManager,
-        AuthenticationStateProvider authenticationStateProvider,
-        ILogger<UserRecordService> logger)
-    {
-        this.userRecordRepository = userRecordRepository;
-        this.navigationManager = navigationManager;
-        this.authenticationStateProvider = authenticationStateProvider;
-        this.logger = logger;
-    }
+    private readonly IRepository<UserRecord> userRecordRepository = userRecordRepository;
+    private readonly NavigationManager navigationManager = navigationManager;
+    private readonly AuthenticationStateProvider authenticationStateProvider = authenticationStateProvider;
+    private readonly ILogger<UserRecordService> logger = logger;
 
     public async ValueTask StoreUserRecordAsync()
     {

@@ -8,7 +8,7 @@ public static class DummyExtensions
 {
     public static void UseDummyAuthentication(this IServiceCollection services)
     {
-        services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        _ = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 options =>
@@ -16,8 +16,8 @@ public static class DummyExtensions
                     options.LoginPath = new PathString("/login");
                 });
 
-        services.AddAuthorization();
-        services.AddHttpContextAccessor();
-        services.AddScoped<ILoginManager, DummyLoginManager>();
+        _ = services.AddAuthorization();
+        _ = services.AddHttpContextAccessor();
+        _ = services.AddScoped<ILoginManager, DummyLoginManager>();
     }
 }

@@ -9,9 +9,7 @@ namespace LinkDotNet.Blog.Web;
 
 public static class ConfigurationExtension
 {
-    public static void AddConfiguration(this IServiceCollection services)
-    {
-        services
+    public static void AddConfiguration(this IServiceCollection services) => _ = services
             .AddApplicationConfiguration()
             .AddAuthenticationConfigurations()
             .AddIntroductionConfigurations()
@@ -19,13 +17,12 @@ public static class ConfigurationExtension
             .AddProfileInformationConfigurations()
             .AddGiscusConfiguration()
             .AddDisqusConfiguration();
-    }
 
     private static IServiceCollection AddApplicationConfiguration(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<ApplicationConfiguration>()
+        _ = services.AddOptions<ApplicationConfiguration>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 var profileInfoSection = config.GetSection(ProfileInformation.ProfileInformationSection);
@@ -46,7 +43,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<AuthInformation>()
+        _ = services.AddOptions<AuthInformation>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(AuthInformation.AuthInformationSection).Bind(settings);
@@ -58,7 +55,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<Introduction>()
+        _ = services.AddOptions<Introduction>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(Introduction.IntroductionSection).Bind(settings);
@@ -70,7 +67,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<AuthInformation>()
+        _ = services.AddOptions<AuthInformation>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(Social.SocialSection).Bind(settings);
@@ -82,7 +79,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<ProfileInformation>()
+        _ = services.AddOptions<ProfileInformation>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(ProfileInformation.ProfileInformationSection).Bind(settings);
@@ -94,7 +91,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<GiscusConfiguration>()
+        _ = services.AddOptions<GiscusConfiguration>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(GiscusConfiguration.GiscusConfigurationSection).Bind(settings);
@@ -106,7 +103,7 @@ public static class ConfigurationExtension
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddOptions<DisqusConfiguration>()
+        _ = services.AddOptions<DisqusConfiguration>()
             .Configure<IConfiguration>((settings, config) =>
             {
                 config.GetSection(DisqusConfiguration.DisqusConfigurationSection).Bind(settings);

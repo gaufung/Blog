@@ -13,15 +13,15 @@ public static class AuthExtensions
 {
     public static void UseAuthentication(this IServiceCollection services)
     {
-        var  authInformation = services.BuildServiceProvider().GetService<IOptions<AuthInformation>>();
+        var authInformation = services.BuildServiceProvider().GetService<IOptions<AuthInformation>>();
 
-        services.Configure<CookiePolicyOptions>(options =>
+        _ = services.Configure<CookiePolicyOptions>(options =>
         {
             options.CheckConsentNeeded = _ => false;
             options.MinimumSameSitePolicy = SameSiteMode.None;
         });
 
-        services.AddAuthentication(options =>
+        _ = services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -52,8 +52,8 @@ public static class AuthExtensions
             };
         });
 
-        services.AddHttpContextAccessor();
-        services.AddScoped<ILoginManager, AuthLoginManager>();
+        _ = services.AddHttpContextAccessor();
+        _ = services.AddScoped<ILoginManager, AuthLoginManager>();
     }
 
     private static Task HandleRedirect(AuthInformation auth, RedirectContext context)

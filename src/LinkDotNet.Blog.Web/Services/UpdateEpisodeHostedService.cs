@@ -31,9 +31,9 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
 
     private readonly EpisodeSyncOption episodeSyncOption;
 
-    private static readonly JsonSerializerOptions GitHubContentJsonSerializerOptions = new JsonSerializerOptions
+    private static readonly JsonSerializerOptions GitHubContentJsonSerializerOptions = new()
     {
-        PropertyNameCaseInsensitive = true, 
+        PropertyNameCaseInsensitive = true,
     };
 
     private static readonly string[] Tags = [".NET Weekly"];
@@ -59,7 +59,7 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
         {
             await Start(stoppingToken);
 
-            await timer.WaitForNextTickAsync(stoppingToken);
+            _ = await timer.WaitForNextTickAsync(stoppingToken);
         }
     }
 
@@ -83,7 +83,7 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
                 logger.FindEmptyEpisodeDocument(episodeSyncOption.ContentAPI);
                 return;
             }
-            files = files.Where(p => p.Name.StartsWith("episode", StringComparison.OrdinalIgnoreCase)).OrderBy(p => p.Id).ToArray();
+            files = [.. files.Where(p => p.Name.StartsWith("episode", StringComparison.OrdinalIgnoreCase)).OrderBy(p => p.Id)];
             var blogPosts = await repository.GetAllAsync(blogPost => blogPost.Title.StartsWith(".NET 周刊第"));
             await UpdateEpisodes(repository, files, blogPosts, token);
         }
@@ -148,7 +148,7 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
         return link?.Url ?? string.Empty;
     }
 
-    sealed class GitHubFile
+    private sealed class GitHubFile
     {
         private static readonly Regex Regex = new(@"episode-(?<index>\d+)\.md");
 
@@ -192,7 +192,7 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
 
     }
 
-    sealed class GitHubFileContent
+    private sealed class GitHubFileContent
     {
         public string Content { get; set; }
     }

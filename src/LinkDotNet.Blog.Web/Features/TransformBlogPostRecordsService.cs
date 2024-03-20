@@ -11,16 +11,10 @@ using Microsoft.Extensions.Logging;
 
 namespace LinkDotNet.Blog.Web.Features;
 
-public sealed partial class TransformBlogPostRecordsService : BackgroundService
+public sealed partial class TransformBlogPostRecordsService(IServiceProvider services, ILogger<TransformBlogPostRecordsService> logger) : BackgroundService
 {
-    private readonly IServiceProvider services;
-    private readonly ILogger<TransformBlogPostRecordsService> logger;
-
-    public TransformBlogPostRecordsService(IServiceProvider services, ILogger<TransformBlogPostRecordsService> logger)
-    {
-        this.services = services;
-        this.logger = logger;
-    }
+    private readonly IServiceProvider services = services;
+    private readonly ILogger<TransformBlogPostRecordsService> logger = logger;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -31,7 +25,7 @@ public sealed partial class TransformBlogPostRecordsService : BackgroundService
         {
             await TransformRecordsAsync();
 
-            await timer.WaitForNextTickAsync(stoppingToken);
+            _ = await timer.WaitForNextTickAsync(stoppingToken);
         }
 
         LogTransformStopped();
@@ -62,7 +56,7 @@ public sealed partial class TransformBlogPostRecordsService : BackgroundService
         {
             var id = userRecord.UrlClicked.Replace("blogPost/", string.Empty, StringComparison.OrdinalIgnoreCase);
             var key = (id, userRecord.DateClicked);
-            clicksPerDay.TryGetValue(key, out var count);
+            _ = clicksPerDay.TryGetValue(key, out var count);
             clicksPerDay[key] = count + 1;
         }
 
@@ -71,9 +65,7 @@ public sealed partial class TransformBlogPostRecordsService : BackgroundService
 
     private static IEnumerable<BlogPostRecord> MergeRecords(
         IEnumerable<BlogPostRecord> newBlogPostRecords,
-        IEnumerable<BlogPostRecord> oldBlogPostRecords)
-    {
-        return oldBlogPostRecords.Concat(newBlogPostRecords)
+        IEnumerable<BlogPostRecord> oldBlogPostRecords) => oldBlogPostRecords.Concat(newBlogPostRecords)
             .GroupBy(x => new { x.BlogPostId, x.DateClicked })
             .Select(g => new BlogPostRecord
             {
@@ -81,7 +73,6 @@ public sealed partial class TransformBlogPostRecordsService : BackgroundService
                 DateClicked = g.Key.DateClicked,
                 Clicks = g.Sum(x => x.Clicks),
             });
-    }
 
     private async Task TransformRecordsAsync()
     {

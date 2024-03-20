@@ -21,13 +21,10 @@ public sealed class AuthLoginManager : ILoginManager
         authProvider = authInformation.Value.Provider;
     }
 
-    public async Task SignInAsync(string redirectUri)
+    public async Task SignInAsync(string redirectUri) => await httpContext.ChallengeAsync(authProvider, new AuthenticationProperties
     {
-        await httpContext.ChallengeAsync(authProvider, new AuthenticationProperties
-        {
-            RedirectUri = redirectUri,
-        });
-    }
+        RedirectUri = redirectUri,
+    });
 
     public async Task SignOutAsync(string redirectUri = "/")
     {

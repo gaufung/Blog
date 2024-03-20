@@ -9,6 +9,6 @@ public static class InMemoryRegistrationExtensions
     public static void UseInMemoryAsStorageProvider(this IServiceCollection services)
     {
         services.AssertNotAlreadyRegistered(typeof(IRepository<>));
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        _ = services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     }
 }

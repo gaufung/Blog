@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using static Raven.Client.Constants;
-
 namespace LinkDotNet.Blog.Web;
 
 public class Program
@@ -33,35 +31,35 @@ public class Program
 
     private static void RegisterServices(WebApplicationBuilder builder)
     {
-        builder.Services.AddRazorPages();
-        builder.Services.AddServerSideBlazor();
-        builder.Services.AddSignalR(options =>
+        _ = builder.Services.AddRazorPages();
+        _ = builder.Services.AddServerSideBlazor();
+        _ = builder.Services.AddSignalR(options =>
         {
             options.MaximumReceiveMessageSize = 1024 * 1024;
         });
 
-        builder.Services.Configure<FormOptions>(options =>
+        _ = builder.Services.Configure<FormOptions>(options =>
         {
             options.KeyLengthLimit = 1024 * 100;
         });
 
         builder.Services.AddConfiguration();
-        builder.Services.AddHttpClient("GitHub", client =>
+        _ = builder.Services.AddHttpClient("GitHub", client =>
         {
             client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
             client.DefaultRequestHeaders.UserAgent.ParseAdd("dotnetweekly");
         });
 
-        builder.Services.AddBlazoredToast();
+        _ = builder.Services.AddBlazoredToast();
         builder.Services.RegisterServices();
         builder.Services.AddStorageProvider(builder.Configuration);
-        builder.Services.Configure<EpisodeSyncOption>(builder.Configuration.GetSection("EpisodeSync"));
-        builder.Services.AddResponseCompression();
-        builder.Services.AddHostedService<BlogPostPublisher>();
-        builder.Services.AddHostedService<TransformBlogPostRecordsService>();
-        builder.Services.AddHostedService<UpdateEpisodeHostedService>();
+        _ = builder.Services.Configure<EpisodeSyncOption>(builder.Configuration.GetSection("EpisodeSync"));
+        _ = builder.Services.AddResponseCompression();
+        _ = builder.Services.AddHostedService<BlogPostPublisher>();
+        _ = builder.Services.AddHostedService<TransformBlogPostRecordsService>();
+        _ = builder.Services.AddHostedService<UpdateEpisodeHostedService>();
 
-        builder.Services.AddHealthChecks()
+        _ = builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");
 
         builder.Services.UseAuthentication();
@@ -71,33 +69,33 @@ public class Program
     {
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
+            _ = app.UseDeveloperExceptionPage();
         }
         else
         {
-            app.UseExceptionHandler("/Error");
-            app.UseHsts();
+            _ = app.UseExceptionHandler("/Error");
+            _ = app.UseHsts();
         }
 
-        app.UseResponseCompression();
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        _ = app.UseResponseCompression();
+        _ = app.UseHttpsRedirection();
+        _ = app.UseStaticFiles();
 
-        app.MapHealthChecks("/health", new HealthCheckOptions
+        _ = app.MapHealthChecks("/health", new HealthCheckOptions
         {
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
         });
 
-        app.UseRouting();
+        _ = app.UseRouting();
 
-        app.UseCookiePolicy();
-        app.UseAuthentication();
-        app.UseAuthorization();
+        _ = app.UseCookiePolicy();
+        _ = app.UseAuthentication();
+        _ = app.UseAuthorization();
 
-        app.MapControllers();
-        app.MapBlazorHub();
-        app.MapFallbackToPage("/_Host");
-        app.MapFallbackToPage("/searchByTag/{tag}", "/_Host");
-        app.MapFallbackToPage("/search/{searchTerm}", "/_Host");
+        _ = app.MapControllers();
+        _ = app.MapBlazorHub();
+        _ = app.MapFallbackToPage("/_Host");
+        _ = app.MapFallbackToPage("/searchByTag/{tag}", "/_Host");
+        _ = app.MapFallbackToPage("/search/{searchTerm}", "/_Host");
     }
 }

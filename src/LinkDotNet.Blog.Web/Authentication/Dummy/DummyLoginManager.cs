@@ -7,14 +7,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace LinkDotNet.Blog.Web.Authentication.Dummy;
 
-public sealed class DummyLoginManager : ILoginManager
+public sealed class DummyLoginManager(IHttpContextAccessor httpContextAccessor) : ILoginManager
 {
-    private readonly HttpContext context;
-
-    public DummyLoginManager(IHttpContextAccessor httpContextAccessor)
-    {
-        context = httpContextAccessor?.HttpContext ?? throw new NotSupportedException("I need HttpContext. Njom njom njom");
-    }
+    private readonly HttpContext context = httpContextAccessor?.HttpContext ?? throw new NotSupportedException("I need HttpContext. Njom njom njom");
 
     public async Task SignOutAsync(string redirectUri = "/")
     {
