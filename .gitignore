@@ -32,3 +32,5 @@ bundle.min.css
 .DS_Store
 
 src/LinkDotNet.Blog.Web/Properties/ServiceDependencies/
+
+.vscode/
