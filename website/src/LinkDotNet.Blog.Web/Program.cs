@@ -6,7 +6,6 @@ using LinkDotNet.Blog.Web.Authentication.OpenIdConnect;
 using LinkDotNet.Blog.Web.Features;
 using LinkDotNet.Blog.Web.Options;
 using LinkDotNet.Blog.Web.RegistrationExtensions;
-using LinkDotNet.Blog.Web.Services;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -47,17 +46,19 @@ public class Program
         _ = builder.Services.AddHttpClient("GitHub", client =>
         {
             client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("dotnetweekly");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("fungkao");
         });
 
         _ = builder.Services.AddBlazoredToast();
         builder.Services.RegisterServices();
         builder.Services.AddStorageProvider(builder.Configuration);
-        _ = builder.Services.Configure<EpisodeSyncOption>(builder.Configuration.GetSection("EpisodeSync"));
+        _ = builder.Services.Configure<EpisodeSyncOptions>(builder.Configuration.GetSection("EpisodeSync"));
+        _ = builder.Services.Configure<BlogSyncOptions>(builder.Configuration.GetSection("BlogSync"));
         _ = builder.Services.AddResponseCompression();
         _ = builder.Services.AddHostedService<BlogPostPublisher>();
         _ = builder.Services.AddHostedService<TransformBlogPostRecordsService>();
-        _ = builder.Services.AddHostedService<UpdateEpisodeHostedService>();
+        _ = builder.Services.AddHostedService<UpdateEpisodeService>();
+        _ = builder.Services.AddHostedService<UpdateBlogService>();
 
         _ = builder.Services.AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");

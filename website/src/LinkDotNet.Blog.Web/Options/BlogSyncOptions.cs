@@ -1,6 +1,6 @@
 namespace LinkDotNet.Blog.Web.Options;
 
-public class EpisodeSyncOption
+public class BlogSyncOptions
 {
     public string ContentAPI { get; set; }
 

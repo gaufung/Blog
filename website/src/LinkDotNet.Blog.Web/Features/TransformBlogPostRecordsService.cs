@@ -14,7 +14,9 @@ namespace LinkDotNet.Blog.Web.Features;
 public sealed partial class TransformBlogPostRecordsService(IServiceProvider services, ILogger<TransformBlogPostRecordsService> logger) : BackgroundService
 {
     private readonly IServiceProvider services = services;
+#pragma warning disable CA1823 // Avoid unused private fields
     private readonly ILogger<TransformBlogPostRecordsService> logger = logger;
+#pragma warning restore CA1823 // Avoid unused private fields
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

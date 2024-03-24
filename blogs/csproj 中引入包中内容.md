@@ -1,14 +1,15 @@
-<!---
-- Title: csproj 中引入包中的内容
-- Tags: .NET, C#
-- status: draft
-- image: https://www.endungen.de/images/file/csproj.png
+<!--
+{
+    "Title": "csproj 中引入包中的内容",
+    "Image": "https://www.endungen.de/images/file/csproj.png",
+    "Tags": ["C#", "MsBuild"],
+    "Status": "Published"
+}
 -->
 
 # 1. 问题
 
 作为应用程序包的开发人员，除了提供应用程序 `API` 接口之外，有时候还需要提供其他资源，比如文本，图片等文件以方便调用者在应用程序中使用。那么该怎么做到呢？
-
 
 # 2. 内嵌资源
 
@@ -35,6 +36,7 @@ if (stream != null)
 ```
 
 # 3. 输出目录
+
 如果资源非常多，或者资源的类型不是简单的文本类型，那么上面的方法就显得非常繁琐。那么可以将这些文件输出到 `nuget` 包中的 `content` 资源下，比如：
 
 ```xml
@@ -69,5 +71,3 @@ Console.WriteLine(content);
 # 4. 结论
 
 对于简单的文件，使用内嵌资源是一种好的方式，而且可以保证内容不会被修改。但是对于复杂的内容，比如一些外部可执行文件，通过输入目录的方式，可以使问题简化。
-
-

@@ -21,15 +21,15 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace LinkDotNet.Blog.Web.Services;
+namespace LinkDotNet.Blog.Web.Features;
 
-public sealed class UpdateEpisodeHostedService : BackgroundService
+public sealed class UpdateEpisodeService : BackgroundService
 {
-    private readonly ILogger<UpdateEpisodeHostedService> logger;
+    private readonly ILogger<UpdateEpisodeService> logger;
     private readonly IHttpClientFactory httpClientFactory;
     private readonly IServiceProvider serviceProvider;
 
-    private readonly EpisodeSyncOption episodeSyncOption;
+    private readonly EpisodeSyncOptions episodeSyncOption;
 
     private static readonly JsonSerializerOptions GitHubContentJsonSerializerOptions = new()
     {
@@ -38,11 +38,11 @@ public sealed class UpdateEpisodeHostedService : BackgroundService
 
     private static readonly string[] Tags = [".NET Weekly"];
 
-    public UpdateEpisodeHostedService(
+    public UpdateEpisodeService(
         IHttpClientFactory httpClientFactory,
         IServiceProvider serviceProvider,
-        IOptions<EpisodeSyncOption> episodeSyncOptionAccessor,
-        ILogger<UpdateEpisodeHostedService> logger)
+        IOptions<EpisodeSyncOptions> episodeSyncOptionAccessor,
+        ILogger<UpdateEpisodeService> logger)
     {
         ArgumentNullException.ThrowIfNull(episodeSyncOptionAccessor);
         this.httpClientFactory = httpClientFactory;
