@@ -55,7 +55,7 @@ public sealed class UpdateEpisodeService : BackgroundService
     {
         using var timer = new PeriodicTimer(TimeSpan.FromHours(6));
 
-        while (!stoppingToken.IsCancellationRequested)
+        while (!stoppingToken.IsCancellationRequested && episodeSyncOption.Enabled)
         {
             await Start(stoppingToken);
 

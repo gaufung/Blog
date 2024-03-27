@@ -1,20 +1,22 @@
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using LinkDotNet.Blog.Domain;
 using LinkDotNet.Blog.Infrastructure.Persistence;
 using LinkDotNet.Blog.Web.Options;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace LinkDotNet.Blog.Web.Features;
 
-internal class UpdateBlogService(
+internal sealed class UpdateBlogService(
     IHttpClientFactory httpClientFactory,
     IServiceScopeFactory serviceScopeFactory,
     IOptions<BlogSyncOptions> blogSyncOptions
@@ -28,7 +30,7 @@ internal class UpdateBlogService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var timer = new System.Threading.PeriodicTimer(TimeSpan.FromHours(6));
+        using var timer = new PeriodicTimer(TimeSpan.FromHours(12));
 
         while (!stoppingToken.IsCancellationRequested && blogSyncOptions.Value.Enabled)
         {
@@ -105,28 +107,19 @@ internal class UpdateBlogService(
 
     private static BlogMetadata ParseBlogMetadata(string content)
     {
-        var lines = content.Split(Environment.NewLine);
-        int? start = null;
-        int? end = null;
-        for (var i = 0; i < lines.Length; i++)
+
+        var regex = new Regex(@"<!--\s*(\{.*?\})\s*-->", RegexOptions.Singleline);
+        var match = regex.Match(content);
+
+        if (match.Success)
         {
-            if (lines[i].StartsWith("<!--", StringComparison.OrdinalIgnoreCase))
-            {
-                start = i;
-            }
-            if (lines[i].StartsWith("-->", StringComparison.OrdinalIgnoreCase))
-            {
-                end = i;
-                break;
-            }
+            var metadata = match.Groups[1].Value;
+            return JsonSerializer.Deserialize<BlogMetadata>(metadata);
         }
-        if (!start.HasValue || !end.HasValue)
+        else
         {
             throw new InvalidOperationException("Could not find metadata in blog");
         }
-
-        var metadata = string.Join(Environment.NewLine, lines.Skip(start.Value + 1).Take(end.Value - start.Value - 1));
-        return JsonSerializer.Deserialize<BlogMetadata>(metadata);
     }
 
 
