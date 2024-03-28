@@ -30,17 +30,16 @@ public class Program
 
     private static void RegisterServices(WebApplicationBuilder builder)
     {
-        _ = builder.Services.AddRazorPages();
-        _ = builder.Services.AddServerSideBlazor();
-        _ = builder.Services.AddSignalR(options =>
-        {
-            options.MaximumReceiveMessageSize = 1024 * 1024;
-        });
-
-        _ = builder.Services.Configure<FormOptions>(options =>
-        {
-            options.KeyLengthLimit = 1024 * 100;
-        });
+        _ = builder.Services.AddRazorPages()
+                   .Services.AddServerSideBlazor()
+                   .Services.AddSignalR(options =>
+                    {
+                        options.MaximumReceiveMessageSize = 1024 * 1024;
+                    })
+                   .Services.Configure<FormOptions>(options =>
+                    {
+                        options.KeyLengthLimit = 1024 * 100;
+                    });
 
         builder.Services.AddConfiguration();
         _ = builder.Services.AddHttpClient("GitHub", client =>
@@ -49,21 +48,20 @@ public class Program
             client.DefaultRequestHeaders.UserAgent.ParseAdd("fungkao");
         });
 
-        _ = builder.Services.AddBlazoredToast();
-        builder.Services.RegisterServices();
-        builder.Services.AddStorageProvider(builder.Configuration);
-        _ = builder.Services.Configure<EpisodeSyncOptions>(builder.Configuration.GetSection("EpisodeSync"));
-        _ = builder.Services.Configure<BlogSyncOptions>(builder.Configuration.GetSection("BlogSync"));
-        _ = builder.Services.AddResponseCompression();
-        _ = builder.Services.AddHostedService<BlogPostPublisher>();
-        _ = builder.Services.AddHostedService<TransformBlogPostRecordsService>();
-        _ = builder.Services.AddHostedService<UpdateEpisodeService>();
-        _ = builder.Services.AddHostedService<UpdateBlogService>();
-
-        _ = builder.Services.AddHealthChecks()
+        _ = builder.Services.AddBlazoredToast()
+            .RegisterServices()
+            .AddStorageProvider()
+            .Configure<EpisodeSyncOptions>(builder.Configuration.GetSection("EpisodeSync"))
+            .Configure<BlogSyncOptions>(builder.Configuration.GetSection("BlogSync"))
+            .AddResponseCompression()
+            .AddHostedService<BlogPostPublisher>()
+            .AddHostedService<TransformBlogPostRecordsService>()
+            .AddHostedService<UpdateEpisodeService>()
+            .AddHostedService<UpdateBlogService>()
+            .AddHealthChecks()
             .AddCheck<DatabaseHealthCheck>("Database");
 
-        builder.Services.UseAuthentication();
+        _ = builder.Services.UseAuthentication();
     }
 
     private static void ConfigureApp(WebApplication app)
@@ -78,20 +76,19 @@ public class Program
             _ = app.UseHsts();
         }
 
-        _ = app.UseResponseCompression();
-        _ = app.UseHttpsRedirection();
-        _ = app.UseStaticFiles();
+        _ = app.UseResponseCompression()
+            .UseHttpsRedirection()
+            .UseStaticFiles();
 
         _ = app.MapHealthChecks("/health", new HealthCheckOptions
         {
             ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse,
         });
 
-        _ = app.UseRouting();
-
-        _ = app.UseCookiePolicy();
-        _ = app.UseAuthentication();
-        _ = app.UseAuthorization();
+        _ = app.UseRouting()
+            .UseCookiePolicy()
+            .UseAuthentication()
+            .UseAuthorization();
 
         _ = app.MapControllers();
         _ = app.MapBlazorHub();

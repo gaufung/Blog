@@ -11,7 +11,7 @@ namespace LinkDotNet.Blog.Web.Authentication.OpenIdConnect;
 
 public static class AuthExtensions
 {
-    public static void UseAuthentication(this IServiceCollection services)
+    public static IServiceCollection UseAuthentication(this IServiceCollection services)
     {
         var authInformation = services.BuildServiceProvider().GetService<IOptions<AuthInformation>>();
 
@@ -19,9 +19,10 @@ public static class AuthExtensions
         {
             options.CheckConsentNeeded = _ => false;
             options.MinimumSameSitePolicy = SameSiteMode.None;
-        });
-
-        _ = services.AddAuthentication(options =>
+        })
+        .AddHttpContextAccessor()
+        .AddScoped<ILoginManager, AuthLoginManager>()
+        .AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -52,8 +53,7 @@ public static class AuthExtensions
             };
         });
 
-        _ = services.AddHttpContextAccessor();
-        _ = services.AddScoped<ILoginManager, AuthLoginManager>();
+        return services;
     }
 
     private static Task HandleRedirect(AuthInformation auth, RedirectContext context)

@@ -8,10 +8,8 @@ namespace LinkDotNet.Blog.Web.RegistrationExtensions;
 
 public static class SqlRegistrationExtensions
 {
-    public static void UseSqlAsStorageProvider(this IServiceCollection services)
+    public static IServiceCollection UseSqlAsStorageProvider(this IServiceCollection services)
     {
-        services.AssertNotAlreadyRegistered(typeof(IRepository<>));
-
         services.AddPooledDbContextFactory<BlogDbContext>(
         (s, builder) =>
         {
@@ -24,42 +22,6 @@ public static class SqlRegistrationExtensions
                 ;
         });
 
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-    }
-
-    public static void UseSqliteAsStorageProvider(this IServiceCollection services)
-    {
-        services.AssertNotAlreadyRegistered(typeof(IRepository<>));
-
-        services.AddPooledDbContextFactory<BlogDbContext>(
-        (s, builder) =>
-        {
-            var configuration = s.GetRequiredService<IOptions<ApplicationConfiguration>>();
-            var connectionString = configuration.Value.ConnectionString;
-            builder.UseSqlite(connectionString)
-#if DEBUG
-                .EnableDetailedErrors()
-#endif
-                ;
-        });
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-    }
-
-    public static void UseMySqlAsStorageProvider(this IServiceCollection services)
-    {
-        services.AssertNotAlreadyRegistered(typeof(IRepository<>));
-
-        services.AddPooledDbContextFactory<BlogDbContext>(
-        (s, builder) =>
-        {
-            var configuration = s.GetRequiredService<IOptions<ApplicationConfiguration>>();
-            var connectionString = configuration.Value.ConnectionString;
-            builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-#if DEBUG
-                .EnableDetailedErrors()
-#endif
-                ;
-        });
-        services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        return services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
     }
 }
