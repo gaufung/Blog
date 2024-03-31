@@ -7,7 +7,7 @@ trigger:
   branches:
     include:
     - master
-  pathsd:
+  paths:
     include:
     - website
 
