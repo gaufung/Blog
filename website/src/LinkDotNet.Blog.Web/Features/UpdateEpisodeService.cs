@@ -105,7 +105,7 @@ public sealed class UpdateEpisodeService : BackgroundService
             var httpResponseMessage = await httpClient.GetAsync(new Uri(file.Url), token);
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                logger.FindEmptyEpisodeDocument(file.Name);
+                logger.FindTheEpisodeDocument(file.Name);
                 using var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync(token);
                 var fileContent = await JsonSerializer.DeserializeAsync<GitHubFileContent>(contentStream, GitHubContentJsonSerializerOptions, token);
 

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace LinkDotNet.Blog.Web;
 
@@ -42,8 +43,14 @@ public class Program
                     });
 
         builder.Services.AddConfiguration();
-        _ = builder.Services.AddHttpClient("GitHub", client =>
+        _ = builder.Services.AddHttpClient("GitHub", (sp, client) =>
         {
+            var githubAuthOptions = sp.GetRequiredService<IOptions<GithubAuthOptions>>();
+            if (!string.IsNullOrWhiteSpace(githubAuthOptions.Value.PAT))
+            {
+                client.DefaultRequestHeaders.Add("Authorization", $"token {githubAuthOptions.Value.PAT}");
+            }
+
             client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
             client.DefaultRequestHeaders.UserAgent.ParseAdd("fungkao");
         });
@@ -53,6 +60,7 @@ public class Program
             .AddStorageProvider()
             .Configure<EpisodeSyncOptions>(builder.Configuration.GetSection("EpisodeSync"))
             .Configure<BlogSyncOptions>(builder.Configuration.GetSection("BlogSync"))
+            .Configure<GithubAuthOptions>(builder.Configuration.GetSection("GithubAuth"))
             .AddResponseCompression()
             .AddHostedService<BlogPostPublisher>()
             .AddHostedService<TransformBlogPostRecordsService>()
