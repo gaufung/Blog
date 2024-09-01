@@ -3,7 +3,7 @@
     "Title": "Run ASP.NET Core in Azure Cloud Service",
     "Image": "https://github.com/user-attachments/assets/7872eb72-ee16-4b2d-a1a2-523645542bd3",
     "Tags": ["ASP.NET Core", "Azure"],
-    "Status": "drafted"
+    "Status": "Published"
 }
 -->
 
