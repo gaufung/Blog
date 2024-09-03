@@ -1,5 +1,5 @@
 using Blazored.Toast;
-
+using c_.Users.fenga.Blog.website.src.LinkDotNet_Blog_Web;
 using HealthChecks.UI.Client;
 
 using LinkDotNet.Blog.Web.Authentication.OpenIdConnect;
@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.AzureAppServices;
 using Microsoft.Extensions.Options;
 
 namespace LinkDotNet.Blog.Web;
@@ -70,6 +72,11 @@ public class Program
             .AddCheck<DatabaseHealthCheck>("Database");
 
         _ = builder.Services.UseAuthentication();
+        _ = builder.Logging.AddAzureWebAppDiagnostics();
+        _ = builder.Services.Configure<AzureBlobLoggerOptions>(options =>
+        {
+            options.BlobName = "log.txt";
+        });
     }
 
     private static void ConfigureApp(WebApplication app)
