@@ -1,6 +1,6 @@
 ---
 name: 深入理解 Async
-tages: C#, 翻译
+tags: C#, 翻译
 status: publish
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: Run ASP.NET Core in Azure Cloud Service
-tages: Azure, C#
+tags: Azure, C#
 status: publish
 ---
 

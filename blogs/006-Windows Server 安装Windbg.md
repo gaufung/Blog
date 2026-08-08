@@ -1,6 +1,6 @@
 ---
 name: Windows Server 安装 Windbg
-tages: Windows
+tags: Windows
 status: publish
 ---
 

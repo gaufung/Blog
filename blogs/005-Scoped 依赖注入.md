@@ -1,6 +1,6 @@
 ---
 name: Scoped 依赖注入
-tages: C#
+tags: C#
 status: publish
 ---
 

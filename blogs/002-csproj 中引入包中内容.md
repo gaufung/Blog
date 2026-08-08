@@ -1,6 +1,6 @@
 ---
 name: csproj 中引入包中内容
-tages: C#
+tags: C#
 status: publish
 ---
 
