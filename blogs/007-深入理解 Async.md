@@ -57,7 +57,7 @@ C# 5 引入了异步函数的概念，它既可以是方法也可以是匿名函
 
 接下来我将通过一个生产实际中的例子来描述异步，我们常常讨厌网络延迟导致应用反应变慢，但是延迟就能很好的帮助我们理解为什么异步如此重要。尤其是你在使用 GUI 框架，比如 Windows Form. 我们第一个例子就是简单的 Windows Forms 引用程序，它拉取这本书的网站首页，然后标签中展示 HTML 页面的长度。
 
-```C#
+```csharp
 public class AsyncIntro : Form
 {
     private static readonly HttpClient client = new HttpClient();
@@ -113,7 +113,7 @@ public class AsyncIntro : Form
 
 接下来稍微修改一下刚刚的例子，在上述例子我直接使用 `await` 在 `HttpClient.GetStringAsync` 方法的返回值上，接下来将它们拆分开来。
 
-```C#
+```csharp
 async void DisplayWebSiteLength(object sender, EventArgs e)
 {
     lebel.Text = "Fetching...";
@@ -141,7 +141,7 @@ async void DisplayWebSiteLength(object sender, EventArgs e)
 
 同步占据了绝大部分 C# 开发者的熟悉的模型，考虑下面的简单的代码
 
-```C#
+```csharp
 Console.WriteLine("Frist");
 Console.WriteLine("Second");
 ```
@@ -183,7 +183,7 @@ Continuation 在 .NET 中用委托的形式保存，它们通常是一个具体�
 
 这里你有三个代码块，两个边界类型。作为简单地例子，在控制台版本地获取网页长度地应用程序，你的代码可能如下：
 
-```C#
+```csharp
 static readonly HttpClient client = new HttpClient();
 
 static async Task<int> GetPageLengthAsync(string url)
@@ -218,7 +218,7 @@ static void PrintPageLength()
 
 异步方法声明和其他方法一样，只不过增加了一个 `async` 的关键字。它可以出现在返回值之前的任何位置，下面都是合法的形式：
 
-```C#
+```csharp
 public static async Task<int> FooAsync() {}
 public async static Task<int> FooAsync() {}
 async public Task<int> FooAsync() {}
@@ -243,7 +243,7 @@ public async virtual Task<int> FooAsycn() {}
 
 设计返回值为 void 的主要原因是用来和事件处理相兼容，举个例子，你或许有也给 UI 按钮的单击的处理事件如下
 
-```C#
+```csharp
 private async void LoadStockPrice(object sender, EventArgs e)
 {
     string ticker = ticketInput.Text;
@@ -255,7 +255,7 @@ private async void LoadStockPrice(object sender, EventArgs e)
 这是一个异步方法，但是对于调用代码（OnClick） 并不关心，它只需要知道处理的事件是否完成，只要你加载了股票价格并且更新 UI。实际上编译器将会为这段代码创建一个状态机，附上一个 continuation，当你在 FetchPriceAsync 方法完成后立即执行。
 你也可以使用订阅的方式来创建指定事件的执行方法。
 
-```C#
+```csharp
 loadStockPriceButton.Click += LoadStockPrice;
 ```
 
@@ -271,13 +271,13 @@ loadStockPriceButton.Click += LoadStockPrice;
 
 `await` 表达式非常简单，仅仅使用 `await` 紧接着一个其他可以生成值的表达式。你可以等待一个函数调用的返回值，一个变量，一个属性。你也可以将一连串方法调用串起来，然后等待它们的结果。
 
-```C#
+```csharp
 int result = await foo.Bar().Baz();
 ```
 
 最前面的 `await` 表达式的优先级比点（调用）操作还低，所以代码等同于下面的形式。
 
-```C#
+```csharp
 int result = await (foo.Bar().Baz());
 ```
 
@@ -302,7 +302,7 @@ awaitable 模式就是用来决定哪些类型可以用在 `await` 操作符后�
 如果 T 通过检查，那么你就可以 await 一个类型为 T 的值。虽然编译器需要知道更多的信息，来决定你的 await 表达式的应该是什么 GetResult 方法的返回值。在这个例子中使用的 void, 也就是说这个 await 表达式被认为是无结果的，就跟直接调用一个 void 方法一样。否则 await 表达式就被分类为生成和 GetResult 相同返回值的类型。
 举个例子，让我们考虑以下 Task.Yield() 静态方法，不同于 Task 的其他方法，Yield() 方法并不返回任务本身，它返回一个 YieldAwaitable 类型。下面是简化的版本。
 
-```C#
+```csharp
 public class Task
 {
     public static YieldAwaitable Yield();
@@ -323,7 +323,7 @@ public struct YieldAwaitable
 
 你可以看到 YieldAwaitable 遵守上面的的描述规定，所以可以这样使用
 
-```C#
+```csharp
 public async Task ValidPrintYieldPrint()
 {
     Console.WriteLine("before yielding");
@@ -334,7 +334,7 @@ public async Task ValidPrintYieldPrint()
 
 但是下面的就不是合法的表达，因为它尝试从 YieldAwaitable 中获取结果
 
-```C#
+```csharp
 public async Task InvalidPrintYieldPrint()
 {
     Console.WriteLine("before yielding");
@@ -345,7 +345,7 @@ public async Task InvalidPrintYieldPrint()
 
 在 InvalidPrintYieldPrint 方法中的无效和下面的是同样的结果。
 
-```C#
+```csharp
 var result = Console.WriteLine("WrintLine is a void method");
 ```
 
@@ -359,7 +359,7 @@ var result = Console.WriteLine("WrintLine is a void method");
 
 await 语句不能使用在不安全的上下文中，但是这并不意味着异步方法中不能使用不安全上下文，下面的例子说明了这种情况：
 
-```C#
+```csharp
 static async Task DelayWithResultOfUnsafeCode(string text)
 {
     int total = 0;
@@ -405,7 +405,7 @@ static async Task DelayWithResultOfUnsafeCode(string text)
 
 你已经看过带返回值的例子，接下来仔细看看返回值这一块。
 
-```C#
+```csharp
 static async Task<int> GetPageLengthAsync(string url)
 {
     Task<string> fetchTextTask = client.GetStringAsync(url);
@@ -438,27 +438,27 @@ static async Task<int> GetPageLengthAsync(string url)
 
 首先简单一点，有时候 await 用来调用方法链的结果或者是属性，比如说：
 
-```C#
+```csharp
 string pageText = await new HttpClient().GetStringAsync();
 ```
 
 看上去 await 可以修改整个表达式的意义，实际上，await 只能作用于单个值。之前的表达式等同于下面：
 
-```C#
+```csharp
 Task<string> task = new HttpClient().GetStringAsync();
 string pageText = await task;
 ```
 
 同样的，await 表达式也可以用在方法的参数中或者其他表达式。如果你有两个方法,分别为 GetHourlyRateAsync() 和 GetHoursWorkedAsync()，分别返回 Task<decimal> 和 Task<int>，你可以有下面这个负载的语句
 
-```C#
+```csharp
 AddPayment(await emploee.GetHourlyRateAsync() *
            await timeSheet.GetHoursWorkedAsync(employee.Id));
 ```
 
 和正常的 C# 表达式计算一样，乘号右边的表达式必须在左边的执行完毕之后才能继续执行。所以前面的表达式可以等效于下面的
 
-```C#
+```csharp
 Task<decimal> hourlyRateTask = employee.GetHourlyRateAsync();
 decimal hourlyRate = await hourlyRateTask;
 Task<int> hoursWorkedTask = timeSheet.GetHoursWorkedAsync(employee.Id);
@@ -468,7 +468,7 @@ AddPayment(hourlyRate * hoursWorked)
 
 怎么写代码是有点区分，如果你觉得单个语句更容易阅读，没问题；如果你将他们都展开，你也许有更多的代码，但是更容易理解和调试。你也可以使用第三种方法，但是这一种方法将产生不同的效果
 
-```C#
+```csharp
 Task<decimal> hourlyRateTask = employee.GetHourlyRateAsync();
 Task<int> hoursWorkedTask = timeSheet.GetHoursWorkedAsync(employee.Id);
 AddPayment(await hourlyRateTask * await hoursWorkedTask);
@@ -486,7 +486,7 @@ AddPayment(await hourlyRateTask * await hoursWorkedTask);
 
 让我们看看控制台的简单的应用程序，它使用单个异步方法等待两个任务，Task.FromResult 通常返回一个完成的任务，而 Task.Deploy 在等待特定的时间后返回。
 
-```C#
+```csharp
 static void Main()
 {
     Task task = DemoCompletedAsync();
@@ -507,7 +507,7 @@ static async Task DemoCompletedASync()
 
 输出如下
 
-```
+```text
 Before first await
 Between awaits
 Method returned
@@ -564,7 +564,7 @@ GetResult 方法意味着从返回值中取结果，它同样肩负着将异步�
 
 当你等 await 一个 task，如果它是 faulted 或者 canceled, 一个异常就会被抛出来，但是这一次不是 AggerateException，而是 AggreateException 中的第一个异常被抛出。大部分情况下，这就是你想要的。这也是 async 的功能，它允许你写出异步的方法异步的代码就跟呢同步的代码一样。举个例子，考虑下面的代码，它尝试从其中的 URL 中获取结果，直到其中一个成功。
 
-```C#
+```csharp
 async Task<string> FetchFirstSuccessfulAsync(IEnumerable<string> urls)
 {
     var client = new HttpClient();
@@ -611,7 +611,7 @@ async Task<string> FetchFirstSuccessfulAsync(IEnumerable<string> urls)
 
 最重要的一点是异步方法中的异常并不是立即返回，甚至方法体在做的第一件事情就是抛出异常，只不过返回一个 faulted 任务。所以这个对于参数验证有点痛苦。假设你想在异步方法中先验证参数之后再执行任务。如果想跟正常的同步代码中的一样验证参数，调用者并不会立马得到错误，而是等到 task 被等待之后才行。下面是个例子
 
-```C#
+```csharp
 static async Task MainASync()
 {
     Task<int> task = ComputeLengthAsync(null);
@@ -642,7 +642,7 @@ static async Task<int> ComputeLenghtAsync(string text)
 
 我更倾向于最后一种，因为它不需要引入额外的方法。下面展示第一种方法，它不包含任何我们没有涉及的东西，只要修改 ComputeLengthAsync 方法，调用方法不需要修改。
 
-```C#
+```csharp
 static Task<int> ComputeLengthAsync(string text)
 {
     if(text == null)
@@ -667,7 +667,7 @@ TPL 在 .NET 4 引入了统一的取消模型，包含两个类型 CancellationT
 
 它们之间是如何叫交互的在 C# 说明种没有详细的文档记录， 已有的信息是如果一个匿名方法体抛出任何异常，返回的 task 将会进入 fault 状态。 但是在实际中，如果任何异步方法抛出 OperationCanceledException，则返回的方法将会以 Canceled 状态结束。你可以简单的通过抛出 OperationCanceledException 即可验证，而不用借助取消的 token。
 
-```C#
+```csharp
 static async Task ThrowCancellationException()
 {
     throw new OpearationCanceledException();
@@ -689,7 +689,7 @@ Console.WriteLine(task.Status);
 
 你可以创建异步匿名函数通过在其他匿名方法或者表达式添加上 async 标识符，下面是个例子：
 
-```C#
+```csharp
 Func<Task> lambda = async () => await Task.Delay(1000);
 Func<Task<int>> anonMethod = async delegate()
 {
@@ -702,7 +702,7 @@ Func<Task<int>> anonMethod = async delegate()
 
 创建的委托的签名的返回类型必须要和异步方法向适应，和其他匿名函数一样可以捕获变量。异步操作只有启用的时候才会调用，多次调用创建多个操作。你不需要在异步匿名函数的结果使用 await。下面的代码就是简单的例子。
 
-```C#
+```csharp
 Func<int, Task<int>> function = async x =>
 {
     Console.WriteLine("Start... x={0}", x);
@@ -718,7 +718,7 @@ Console.WriteLine("Second result: {0}", second.Result);
 
 我故意让第二个操作完成地更快一点，但是因为你要等待第一个完成之后才能打印，所以输出结果如下：
 
-```
+```text
 Starting... x=5
 Starting... x=3
 Finished... x=3
@@ -749,7 +749,7 @@ Second result: 6
 
 在一些场景下，已经完成的任务是大部分常见的情况，那么使用 `ValueTask<TResult>` 是非常有用的，为了证明它，让我们考虑一种现实世界的一种例子吧。如果没想每次从 `System.IO.Stream` 中每次读一个字节，并且异步的读取。你可简单地添加一个 buffer 抽象来比卖你调用 ReadAsync 方法。但是你想添加一个异步方法来封装这个操作来从 stream 中生成一个 buffer。你可以使用 byte? 来表明你是否已经到达地尾部。这个方法非常容易写，但是每个分配一个 `Task<byte?>` 会增加 GC 的压力。使用 `ValueTask<TResult>`， 堆分配只会出现在你需要重新填充这个 buffer。
 
-```C#
+```csharp
 public sealed class ByteStream : IDisposable
 {
     private readonly Stream stream;
@@ -809,7 +809,7 @@ using (var stream = new ByteStream(File.OpenReAd（"file.dat")))
 
 编译器需要通过 builder 信息让异步方法和自定义类型关联起来， 你需要直到如何创建自定义个的类型。它需要直到如恶化创建自定义任务，传递结果或者异常，在 continuation 的恢复过来。比起 awaitable 模式，你需要做的事情更多。
 
-```C#
+```csharp
 [AsyncMethodBuilder(typeof(CustomTaskBuilder<>))]
 public class CustomTask<T>
 {
@@ -870,7 +870,7 @@ C# 对程序的入口 Main 函数的要求已经存在很长时间了
 
 除此之外，这就是一个普通的异步方法，举个例子，下图就是展示了异步的入口
 
-```C#
+```csharp
 static async Task Main()
 {
     Console.WriteLine("Before Delay");
@@ -881,7 +881,7 @@ static async Task Main()
 
 编译器通过创建一个同步的封装方法来处理异步的入口，封装的方法既可以无参数，也可以是接受 string[] 参数；既可以返回 void，也可以返回 int，这个取决于异步入口的形式。封装的方法调用真正的方法的 GetAwaiter() 或者任务，然后调用 GetResult 方法获取结果，下面就是封装的方法示例。
 
-```C#
+```csharp
 static void <Main>()
 {
     Main().GetAwaiter().GetResult();
@@ -902,7 +902,7 @@ static void <Main>()
 
 ConfigureAwait 方法是针对这个目的设计的，它接受一个参数来决定返回的 awitable 是否捕获当前的上下文。再实际中，都是传递 false 这个参数。在库代码中，你不能写这样的代码：
 
-```C#
+```csharp
 static async Task<int> GetPageLengthAsync(string url)
 {
     var fetchTextTask = client.GetStringAsync(url);
@@ -913,7 +913,7 @@ static async Task<int> GetPageLengthAsync(string url)
 
 你需要调用 ConfigureAwait(false) 在任务返回的时候，然后等待结果
 
-```C#
+```csharp
 static async Task<int> GetPageLengthAsync(string url)
 {
     var fetchTextTask = client.GetStringAsync(url).ConfiguraAwait(false);
@@ -924,7 +924,7 @@ static async Task<int> GetPageLengthAsync(string url)
 
 在这里我做了一个改变，在第一个例子中 fetchTextTask 的类型是 `Task<int>`, 而在第二个例子中为 `ConfigurationTaskAwaitable<int>`。不过我看过的大部分代码是这届等待结果，就跟这样
 
-```C#
+```csharp
 string text = await client.GetStringASync(url).ConfiguraitonAwait(false);
 ```
 
@@ -938,7 +938,7 @@ string text = await client.GetStringASync(url).ConfiguraitonAwait(false);
 
 在 5.6.1 节中，你已经看到一些代码来实现同样的目的：弄清楚为每个工人付多少钱基于的工作效率和工作的时间。最后两段代码如下：
 
-```C#
+```csharp
 Task<decimal> hourlyRateTask = employee.GetHourlyRateAsync();
 decimal hourlyRate = await hourlyRateTask;
 Task<int> hoursWorkedTask = timeSheet.GetHoursWorkedAsync(employee.Id);
@@ -948,7 +948,7 @@ AddPayment(hourlyRate * hoursWorked)
 
 以及
 
-```C#
+```csharp
 Task<decimal> hourlyRateTask = employee.GetHourlyRateAsync();
 Task<int> hoursWorkedTask = timeSheet.GetHoursWorkedAsync(employee.Id);
 AddPayment(await hourlyRateTask * await hoursWorkedTask);
@@ -958,7 +958,7 @@ AddPayment(await hourlyRateTask * await hoursWorkedTask);
 
 这种简短的模式有点突兀，如果你想并行但是也可以用单独的变量来表示。
 
-```C#
+```csharp
 Task<decimal> hourlyRateTask = employee.GetHourlyRateAsync();
 Task<int> hoursWorkedTask = timeSheet.GetHoursWorkedAsync(employee.Id);
 decimal hourlyRate = await hourlyRateTask;
@@ -996,7 +996,7 @@ Stephon Toub 有两篇精彩而又详细的博客文章讨论了这个话题：
 
 测试异步方法非常 tricky， 尤其是你想要测试异步本身。这也不是不可能的任务，但是准备好上刀山的准备如果你想完全测试。大部分单元测试框架的确支持异步测试，然而大部分支持是位异步方法测试，而不是同步和异步的混合体的测试。典型的话，编写异步测试和写测试方法一样简单，只不过添加 async 标识符，然后返回 Task 而不是 void.
 
-```C#
+```csharp
 [Test]
 public async Tesk FooAsync()
 {
@@ -1051,7 +1051,7 @@ public async Tesk FooAsync()
 
 让我以具体的例子来说明，下面的代码展示了简单的异步方法。
 
-```C#
+```csharp
 static async Task PrintAndWait(TimeSpan delay)
 {
     Console.WriteLine("Before first delay");
@@ -1072,7 +1072,7 @@ static async Task PrintAndWait(TimeSpan delay)
 
 使用合适的工具，你可以将上述的代码转换为下面的代码。编译器大部分生成的代码都不是合法的 C# 代码。我已经重写了部分代码让它们成为有效的标识符以便能让代码运行起来。 在其他情况下，我们修改标识符以便让代码可读。本质上讲，这和生成代码相同，但是更容易阅读。其他地方，我甚至在两种条件上使用 switch 语句， 而编译器可能选择更高效的 if/else 语句。换句话说，switch 语句代表了更通用的语句，但是编译器可以生成更简单的代码对于简单的情况。
 
-```C#
+```csharp
 [AsyncStateMachine(typeof(PrintAndWaitStateMachine))]
 [DebuggerStepThrough]
 private static unsafe Task PrintAndWait(TimeSpan delay)
@@ -1113,7 +1113,7 @@ private struct PrintAdnWaitStateMachine : IAsyncStateMachine
 
 根方法就是包含的 AsyncTaskMethodBuilder 方法，这是一个值类型，这是异步框架中最通用的方法，你可以看到在本章的后面看到状态机和这个 builder 交互。
 
-```C#
+```csharp
 [AsyncStateMachine(typeof(PrintAndWaitStateMachine))]
 [DebuggerStepThrough]
 private static unsafe Task PrintAndWait(TimeSpan delay)
@@ -1137,7 +1137,7 @@ private static unsafe Task PrintAndWait(TimeSpan delay)
 
 在创建状态机之后，根方法要求状态机的 builder 来启动它，通过引用的方式传递给它。在接下来你会看到很多引用传递的方式，主要是为了效率和一致性。现在状态机和 AsyncTaskMethodBuilder 都是可以变的值类型。将 machine 以引用的形式传递给 Start 方法避免了拷贝状态，这就保证了在 Start 中的任何改变都是可见的。这也是为什么你使用 machine.builder 同时作用域 Start 调用和 Task 任务的返回。假设你将 machine.builder 拆分成局部变量，就像这样：
 
-```C#
+```csharp
 var  builder = machine.builder;
 builder.Start(ref machine);
 return buidler.Task;
@@ -1153,7 +1153,7 @@ return buidler.Task;
 
 我仍然忽视了状态机的大部分代码（在 MoveNext() 中）， 但是提醒一下结构的类型。
 
-```C#
+```csharp
 [CompilerGenerated]
 private struct PrintAdnWaitStateMachine : IAsyncStateMachine
 {
@@ -1207,7 +1207,7 @@ state 和 builder 是相对简单，state 是一个状态对应着下面的值
 
 下面地例子更清楚的表达我的意思，考虑下面的异步方法：
 
-```C#
+```csharp
 public async Task LocalVariableDemoAsync()
 {
     int x = DateTime.UtcNow.Second;
@@ -1222,7 +1222,7 @@ public async Task LocalVariableDemoAsync()
 
 最后，这里有临时栈变量。它们会在 await 表达式作为更大表达式的一部分或者中间值被记住。在刚刚的例子中没有这种临时栈变量，这也是为什么只有四个字段：状态，builder，awaiter 或者参数。举个例子如下：
 
-```C#
+```csharp
 public async Task TemporaryStackDemoAsync()
 {
     Task<int> task = Task.FromResult(10);
@@ -1235,7 +1235,7 @@ public async Task TemporaryStackDemoAsync()
 
 你可以想编译器重写这部分代码，引入了额外的局部变量。
 
-```C#
+```csharp
 public async Task TemporaryStackDemoAsync()
 {
     Task<int> task = Task.FromResult(10);
@@ -1274,7 +1274,7 @@ public async Task TemporaryStackDemoAsync()
 
 我已经展示了 SetStateMachine 方法，非常简单
 
-```C#
+```csharp
 void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
 {
     this.builder.SetStateMachine(stateMachine);
@@ -1283,7 +1283,7 @@ void IAsyncStateMachine.SetStateMachine(IAsyncStateMachine stateMachine)
 
 在 release 版本中实现和这个一样，这个方法的目的是从更高层次来解释。当状态机执行第一步，它和根方法中的局部变量一样在栈中保存，如果它暂停了，它需要将自己装箱起来起来放到堆中。 所以所有的信息在恢复的时候保持原样。在它装箱之后，SetStateMachine 被装箱之后的值调用，使用装箱之后的值作为参数。换句话说，更深入地了解框架，你会发现代码是这样的
 
-```C#
+```csharp
 void BoxAdnRemember<TStateMachine>(ref TStateMachine stateMachine)
     where TStateMachine: IStateMachine
 {
@@ -1308,7 +1308,7 @@ void BoxAdnRemember<TStateMachine>(ref TStateMachine stateMachine)
 
 我将一个完整的方法开始，不要期待它代表任何事情，就简单花点时间浏览一下。拥有了具体的例子，更一般的结构就更容易理解，后面你可以回过来看看每一部分是如何对应到这个例子中的。我将再一次重复一下 6-1 中的例子。
 
-```C#
+```csharp
 static async Task PrintAndWait(TimeSpan delay)
 {
     Console.WriteLine("Before first delay");
@@ -1321,7 +1321,7 @@ static async Task PrintAndWait(TimeSpan delay)
 
 下面的代码就是反编译后的代码，不过重写了一下以便更容易阅读。
 
-```C#
+```csharp
 void IAsyncStateMachine.MoveNext()
 {
     int num = this.state;
@@ -1403,7 +1403,7 @@ void IAsyncStateMachine.MoveNext()
 
 有了这些基本概念，下面的代码展示了 MoveNext 方法中的一般结构的伪代码。在下一节中你可以看到由于额外的控制流而更复杂的代码。
 
-```C#
+```csharp
 void IAsyncStateMachine.MoveNext()
 {
     try
@@ -1457,7 +1457,7 @@ try/catch 语句块包含了之前异步方法的全部代码，如果抛出异�
 
 有了这些，我们回顾一下之前的第一个 await 表达式的处理
 
-```C#
+```csharp
     awaiter1 = Task.Delay(this.delay).GetAwaiter();
     if(awaiter1.IsCompleted)
     {
@@ -1486,7 +1486,7 @@ builder.AwaitUnsafeOnCompl;eted(ref awaiter1, ref this) 方法是装箱操作的
 
 看看下面的代码
 
-```C#
+```csharp
 await Task.Dealy(dealy);
 ```
 
@@ -1504,7 +1504,7 @@ await Task.Dealy(dealy);
 
 在开始之前，我先介绍引入的控制流并不影响生成代码的复杂性。在下面的代码中，循环语句被带入到方法中，你将打印三次 Between delay 而不是一次
 
-```C#
+```csharp
 static async Task PrintAndWait(TimeSpan delay)
 {
     Console.WriteLine("Before first delay");
@@ -1520,7 +1520,7 @@ static async Task PrintAndWait(TimeSpan delay)
 
 反编译之后的代码和之前差不多，唯一的区别在于
 
-```C#
+```csharp
 GetFristAwaitResult:
     awaite1.GetResult();
     Console.WriteLine("Between delay");
@@ -1529,7 +1529,7 @@ GetFristAwaitResult:
 
 变成了
 
-```C#
+```csharp
 GetFristAwaitResult:
     awaite1.GetResult();
     for (int i =0; i<3; i++)
@@ -1547,7 +1547,7 @@ GetFristAwaitResult:
 
 目前我们的例子中值包含两个 await 语句，为了简化，目前将 await 语句调整为只有一个，请看下面的代码
 
-```C#
+```csharp
 static async Task AwaitInLoop(TimeSpan delay)
 {
     Console.WriteLine("Before loop");
@@ -1567,7 +1567,7 @@ static async Task AwaitInLoop(TimeSpan delay)
 
 当然你也可以通过很多 goto 语句来实现 for 循环，这样你就可以跳转到任何地方。下面的的反编译的代码就是 MoveNext 方法的主体部分。我只包含了部分 try 的语句。这也是我们专注的地方。
 
-```C#
+```csharp
     switch(num)
     {
         default:
@@ -1620,7 +1620,7 @@ ForLoopCondition:
 
 在本小节中，我将仅仅展示在 try 语句块中使用 await，而且只有 finally 语句块。这也是最常用的方式，就跟 using 一样，下面的代码就是我们要反编译的。
 
-```C#
+```csharp
 static async Task AwaitInTryFinally(TimeSpan delay)
 {
     Console.WriteLine("Before try block");
@@ -1641,7 +1641,7 @@ static async Task AwaitInTryFinally(TimeSpan delay)
 
 你可以想象反编译之后的代码如下：
 
-```C#
+```csharp
     switch(num)
     {
         default:
@@ -1680,7 +1680,7 @@ MethodStart:
 
 这些全部合并起来就是下面的代码，在 try 语句块的内容。尽管还是有很多代码，但是这些你已经非常熟悉了，我仅仅高亮了 try/finally 内容。
 
-```C#
+```csharp
     switch(num)
     {
         default:

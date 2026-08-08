@@ -17,6 +17,7 @@ status: publish
 ```powershell
 Install-Script -Name winget-install -RequiredVersion 4.0.4
 ```
+
 Powershell 仓库提供了一个 `winget-install` 脚本。安装完毕后，直接执行 `winget-install`，这样 `winget` 命令行工具就安装到 Server 端机器上
 
 - 安装 `Microsoft.Windbg` 软件

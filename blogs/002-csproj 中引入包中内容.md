@@ -12,7 +12,7 @@ status: publish
 
 C# 对于文件可以选择将其作为 `Embeded Resource` ，这样文件内容会作为应用程序集的一部分被打包到 `dll` 中。比如：
 
-```csharp
+```xml
 <ItemGroup>
     <EmbeddedResource Include="words.txt" />
 </ItemGroup>
